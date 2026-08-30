@@ -1,0 +1,22 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+
+# web-ext default artifacts dir (in case someone runs web-ext without the config)
+web-ext-artifacts/
+
+# Taskfile cache
+.task/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+todo.md

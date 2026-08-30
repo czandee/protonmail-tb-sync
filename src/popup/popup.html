@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>ProtonMail Labels to Tags</title>
+  <style>
+    body {
+      font-family: system-ui, sans-serif;
+      width: 320px;
+      padding: 16px;
+      margin: 0;
+      background: #1e1e2e;
+      color: #cdd6f4;
+    }
+    h2 {
+      margin: 0 0 12px;
+      font-size: 15px;
+      color: #cba6f7;
+    }
+    label {
+      display: block;
+      font-size: 12px;
+      margin-bottom: 4px;
+      color: #a6adc8;
+    }
+    select {
+      width: 100%;
+      padding: 6px 8px;
+      border-radius: 6px;
+      border: 1px solid #45475a;
+      background: #313244;
+      color: #cdd6f4;
+      font-size: 13px;
+      margin-bottom: 12px;
+    }
+    button {
+      width: 100%;
+      padding: 8px;
+      border: none;
+      border-radius: 6px;
+      background: #cba6f7;
+      color: #1e1e2e;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    #resetBtn {
+      display: none;
+      margin-top: 6px;
+      background: #45475a;
+      color: #cdd6f4;
+      font-weight: normal;
+      font-size: 12px;
+    }
+    #status {
+      margin-top: 12px;
+      font-size: 12px;
+      min-height: 40px;
+      color: #a6e3a1;
+      white-space: pre-wrap;
+    }
+    #status.error { color: #f38ba8; }
+  </style>
+</head>
+<body>
+  <h2>ProtonMail Labels → Tags</h2>
+  <label for="account">ProtonMail Bridge account</label>
+  <select id="account"><option value="">Loading…</option></select>
+  <button id="syncBtn" disabled>Sync now</button>
+  <button id="resetBtn">Cancel sync</button>
+  <div id="status" aria-live="polite"></div>
+  <script src="popup.js"></script>
+</body>
+</html>

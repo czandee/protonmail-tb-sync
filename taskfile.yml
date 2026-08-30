@@ -1,0 +1,55 @@
+version: '3'
+
+vars:
+  DIST_DIR: dist
+
+tasks:
+  default:
+    desc: Lists all available automation commands
+    cmds:
+      - task --list
+
+  install:
+    desc: Installs development dependencies
+    sources:
+      - package.json
+    generates:
+      - node_modules/.package-lock.json
+    cmds:
+      - npm install
+
+  clean:
+    desc: Removes build artifacts
+    cmds:
+      - rm -rf {{.DIST_DIR}}
+
+  lint:
+    desc: Validates the extension manifest and source files via web-ext
+    deps: [install]
+    sources:
+      - src/**/*
+    cmds:
+      - npm run lint
+
+  build:
+    desc: Packages the extension into an installable .xpi via web-ext
+    deps: [lint]
+    sources:
+      - src/**/*
+    generates:
+      - '{{.DIST_DIR}}/*.xpi'
+    cmds:
+      - npm run build
+      - for f in {{.DIST_DIR}}/*.zip; do mv "$f" "${f%.zip}.xpi"; done
+
+  audit:
+    desc: Applies safe (non-breaking) security fixes to npm dependencies
+    deps: [install]
+    cmds:
+      - npm audit fix
+
+  dev:
+    desc: Launches Thunderbird with the extension loaded in a temporary profile
+    deps: [install]
+    cmds:
+      - npm start
