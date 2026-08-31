@@ -13,6 +13,9 @@ jobs:
 
     steps:
       - uses: actions/checkout@v7
+        with:
+          # Full history needed so we can push the updates.json commit back.
+          fetch-depth: 0
 
       - uses: actions/setup-node@v7
         with:
@@ -22,6 +25,29 @@ jobs:
       - uses: arduino/setup-task@v3
 
       - run: task build
+
+      - name: Update updates.json
+        env:
+          GH_REPO: ${{ github.repository }}
+          GH_TAG: ${{ github.ref_name }}
+        run: |
+          node -e "
+            const fs = require('fs');
+            const version = process.env.GH_TAG.replace(/^v/, '');
+            const repo = process.env.GH_REPO;
+            const tag = process.env.GH_TAG;
+            const xpi = \`protonmail_labels_to_tags-\${version}.xpi\`;
+            const update_link = \`https://github.com/\${repo}/releases/download/\${tag}/\${xpi}\`;
+            const u = JSON.parse(fs.readFileSync('updates.json', 'utf8'));
+            u.addons['protonmail-labels-to-tags@zandee.ch'].updates = [{ version, update_link }];
+            fs.writeFileSync('updates.json', JSON.stringify(u, null, 2) + '\n');
+            console.log('updates.json set to version', version);
+          "
+          git config user.name 'github-actions[bot]'
+          git config user.email 'github-actions[bot]@users.noreply.github.com'
+          git add updates.json
+          git commit -m "chore: update updates.json for $GH_TAG"
+          git push origin HEAD:main
 
       - uses: softprops/action-gh-release@v2
         with:

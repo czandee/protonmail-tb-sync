@@ -16,6 +16,7 @@ Synchronizes ProtonMail labels to local Thunderbird tags. Requires **ProtonMail 
 - Shows live progress and a summary in the popup.
 - Remembers your last-used account across sessions.
 - Sync is **read-only with respect to ProtonMail** — it only writes Thunderbird-local tags and never touches the server.
+- Auto-update support — this requires signature checking disabled in Thunderbird settings as this extension is not registered with addons.thunderbird.net.
 
 ---
 

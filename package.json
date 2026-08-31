@@ -5,7 +5,7 @@
   "private": true,
   "license": "GPL-3.0-only",
   "scripts": {
-    "lint": "web-ext lint",
+    "lint": "web-ext lint --self-hosted",
     "build": "web-ext build --overwrite-dest",
     "start": "web-ext run -t thunderbird"
   },
