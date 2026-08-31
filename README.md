@@ -30,7 +30,7 @@ Synchronizes ProtonMail labels to local Thunderbird tags. Requires **ProtonMail 
 ## Installation
 
 1. Go to the [Releases page](../../releases) and download the `.xpi` file from the latest release.
-2. Open Thunderbird and go to **Tools → Add-on Manager** (`Ctrl+Shift+A`).
+2. Open Thunderbird and go to **Tools → Add-ons and themes**.
 3. Click the gear icon → **Install Add-on From File…**.
 4. Select the downloaded `.xpi`.
 
@@ -38,7 +38,7 @@ Synchronizes ProtonMail labels to local Thunderbird tags. Requires **ProtonMail 
 
 ## Usage
 
-1. Click the **ProtonMail Labels → Tags** button in the Thunderbird toolbar.
+1. Click the **Sync ProtonMail Labels** button in the Thunderbird toolbar.
 2. Select your ProtonMail Bridge account from the dropdown.
 3. Click **Sync now**.
 
