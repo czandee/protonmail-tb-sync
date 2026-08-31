@@ -19,7 +19,7 @@ jobs:
           node-version: '20'
           cache: npm
 
-      - uses: arduino/setup-task@v2
+      - uses: arduino/setup-task@v3
 
       - run: task build
 
