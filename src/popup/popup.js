@@ -4,8 +4,8 @@
  *
  * Runs in the popup page opened by the toolbar button. Communicates with
  * background.js exclusively through `browser.runtime.sendMessage` (outbound)
- * and `browser.runtime.onMessage` (inbound). Persists the last-selected
- * account in `storage.local` so the UI restores it on next open.
+ * and `browser.runtime.onMessage` (inbound). Persists the last-selected account
+ * and the autoSyncOnStartup preference in `storage.local`.
  * Sync-in-progress state is owned by background.js; the popup reads it from
  * storage on open to recover correctly after being closed and reopened mid-sync.
  *
@@ -27,6 +27,7 @@ const accountSelect = document.getElementById('account');
 const syncBtn = document.getElementById('syncBtn');
 const resetBtn = document.getElementById('resetBtn');
 const statusEl = document.getElementById('status');
+const autoSyncCheckbox = document.getElementById('autoSyncOnStartup');
 
 /** A sync started more than this many ms ago is treated as stale/crashed. Must match syncStartedAt written by background.js. */
 const SYNC_STALE_MS = 10 * 60 * 1000;
@@ -66,8 +67,10 @@ function setStatus(text, isError = false) {
     accountSelect.appendChild(opt);
   }
 
-  const { lastAccountId, syncInProgress, syncStartedAt } =
-    await browser.storage.local.get(['lastAccountId', 'syncInProgress', 'syncStartedAt']);
+  const { lastAccountId, syncInProgress, syncStartedAt, autoSyncOnStartup } =
+    await browser.storage.local.get(['lastAccountId', 'syncInProgress', 'syncStartedAt', 'autoSyncOnStartup']);
+
+  autoSyncCheckbox.checked = !!autoSyncOnStartup;
 
   if (lastAccountId) {
     const exists = [...accountSelect.options].some(o => o.value === lastAccountId);
@@ -104,6 +107,10 @@ resetBtn.addEventListener('click', () => {
       setStatus('Sync cancelled.');
     }
   }, CANCEL_FALLBACK_MS);
+});
+
+autoSyncCheckbox.addEventListener('change', () => {
+  browser.storage.local.set({ autoSyncOnStartup: autoSyncCheckbox.checked });
 });
 
 /**

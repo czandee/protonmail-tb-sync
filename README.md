@@ -12,6 +12,7 @@ Synchronizes ProtonMail labels to local Thunderbird tags. Requires **ProtonMail 
 
 - Reads your ProtonMail labels via Bridge and creates matching Thunderbird tags automatically.
 - Reconciles tags on every sync: labels removed in ProtonMail are also removed from your messages in Thunderbird.
+- Optional auto-sync on Thunderbird start — enable it once in the popup, no further action needed.
 - Shows live progress and a summary in the popup.
 - Remembers your last-used account across sessions.
 - Sync is **read-only with respect to ProtonMail** — it only writes Thunderbird-local tags and never touches the server.

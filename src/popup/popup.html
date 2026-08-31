@@ -64,6 +64,16 @@
       white-space: pre-wrap;
     }
     #status.error { color: #f38ba8; }
+    .checkbox-label {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      color: #a6adc8;
+      margin-top: 10px;
+      cursor: pointer;
+    }
+    .checkbox-label input { cursor: pointer; }
   </style>
 </head>
 <body>
@@ -72,6 +82,10 @@
   <select id="account"><option value="">Loading…</option></select>
   <button id="syncBtn" disabled>Sync now</button>
   <button id="resetBtn">Cancel sync</button>
+  <label class="checkbox-label">
+    <input type="checkbox" id="autoSyncOnStartup" />
+    Sync automatically on Thunderbird start
+  </label>
   <div id="status" aria-live="polite"></div>
   <script src="popup.js"></script>
 </body>

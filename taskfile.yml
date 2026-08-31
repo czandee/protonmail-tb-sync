@@ -23,12 +23,32 @@ tasks:
     cmds:
       - rm -rf {{.DIST_DIR}}
 
-  lint:
-    desc: Validates the extension manifest and source files via web-ext
+  sync-version:
+    desc: Copies the version from package.json into manifest.json (single source of truth)
     deps: [install]
     sources:
-      - src/**/*
+      - package.json
     cmds:
+      - node -e "
+          const fs = require('fs');
+          const version = require('./package.json').version;
+          const manifest = JSON.parse(fs.readFileSync('src/manifest.json', 'utf8'));
+          if (manifest.version !== version) {
+            manifest.version = version;
+            fs.writeFileSync('src/manifest.json', JSON.stringify(manifest, null, 2) + '\n');
+            console.log('[sync-version] manifest.json updated to ' + version);
+          }
+        "
+
+  lint:
+    desc: Validates the extension manifest and source files via web-ext
+    deps: [sync-version]
+    cmds:
+      # web-ext lints against the Firefox API surface, not Thunderbird's.
+      # The 16 warnings it produces (MANIFEST_PERMISSIONS, UNSUPPORTED_API,
+      # MISSING_DATA_COLLECTION_PERMISSIONS) are all false positives: the
+      # permissions and APIs are valid Thunderbird MailExtension features
+      # that Firefox simply does not implement. They can be safely ignored.
       - npm run lint
 
   build:

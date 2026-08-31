@@ -30,6 +30,9 @@ let syncCancelled = false;
 /** How many messages to refresh via messages.get() per concurrent batch. */
 const MSG_REFRESH_BATCH_SIZE = 50;
 
+/** Delay in ms after Thunderbird startup before triggering an auto-sync, to allow Bridge IMAP to connect. */
+const STARTUP_SYNC_DELAY_MS = 15_000;
+
 const tagApi = {
   list: () => browser.messages.tags.list(),
   create: (k, n, c) => browser.messages.tags.create(k, n, c),
@@ -328,11 +331,49 @@ async function syncAccount(accountId, progressCallback) {
   };
 }
 
+/**
+ * Manages sync state and runs a full sync for the given account.
+ * PROGRESS/DONE/ERROR/CANCELLED messages are sent to the popup if it is open;
+ * if no popup is listening the sends fail silently via .catch(() => {}).
+ * This allows runSync to be called both from the message handler (popup open)
+ * and from the startup listener (popup not open).
+ *
+ * @param {string} accountId - ID of the account to sync.
+ */
+async function runSync(accountId) {
+  if (syncRunning) return;
+  syncRunning = true;
+  syncCancelled = false;
+  browser.storage.local.set({ syncInProgress: true, syncStartedAt: Date.now() });
+  try {
+    const result = await syncAccount(accountId, (progress) => {
+      if (!syncCancelled) browser.runtime.sendMessage({ type: 'PROGRESS', ...progress }).catch(() => {});
+    });
+    if (!syncCancelled) browser.runtime.sendMessage({ type: 'DONE', result }).catch(() => {});
+  } catch (err) {
+    if (!syncCancelled) browser.runtime.sendMessage({ type: 'ERROR', message: err.message }).catch(() => {});
+  } finally {
+    const wasCancelled = syncCancelled;
+    syncRunning = false;
+    syncCancelled = false;
+    browser.storage.local.set({ syncInProgress: false });
+    if (wasCancelled) browser.runtime.sendMessage({ type: 'CANCELLED' }).catch(() => {});
+  }
+}
+
 // Clear any stale syncInProgress flag left over from a previous Thunderbird crash.
-// The finally block in the SYNC handler normally clears it, but won't run if the
-// process is killed before it completes.
-browser.runtime.onStartup.addListener(() => {
+// The finally block in runSync normally clears it, but won't run if the process is
+// killed before it completes. If autoSyncOnStartup is enabled and a lastAccountId is
+// saved, trigger a silent sync after a short delay to allow Bridge IMAP to connect.
+browser.runtime.onStartup.addListener(async () => {
   browser.storage.local.set({ syncInProgress: false });
+
+  const { autoSyncOnStartup, lastAccountId } =
+    await browser.storage.local.get(['autoSyncOnStartup', 'lastAccountId']);
+  if (!autoSyncOnStartup || !lastAccountId) return;
+
+  await new Promise(resolve => setTimeout(resolve, STARTUP_SYNC_DELAY_MS));
+  runSync(lastAccountId);
 });
 
 browser.runtime.onMessage.addListener(async (msg) => {
@@ -347,23 +388,6 @@ browser.runtime.onMessage.addListener(async (msg) => {
   }
 
   if (msg.type === 'SYNC') {
-    if (syncRunning) return;
-    syncRunning = true;
-    syncCancelled = false;
-    browser.storage.local.set({ syncInProgress: true, syncStartedAt: Date.now() });
-    try {
-      const result = await syncAccount(msg.accountId, (progress) => {
-        if (!syncCancelled) browser.runtime.sendMessage({ type: 'PROGRESS', ...progress }).catch(() => {});
-      });
-      if (!syncCancelled) browser.runtime.sendMessage({ type: 'DONE', result }).catch(() => {});
-    } catch (err) {
-      if (!syncCancelled) browser.runtime.sendMessage({ type: 'ERROR', message: err.message }).catch(() => {});
-    } finally {
-      const wasCancelled = syncCancelled;
-      syncRunning = false;
-      syncCancelled = false;
-      browser.storage.local.set({ syncInProgress: false });
-      if (wasCancelled) browser.runtime.sendMessage({ type: 'CANCELLED' }).catch(() => {});
-    }
+    runSync(msg.accountId);
   }
 });
