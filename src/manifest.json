@@ -7,9 +7,20 @@
   "background": {
     "scripts": ["background.js"]
   },
+  "icons": {
+    "48": "icons/pm-tb-48.png",
+    "96": "icons/pm-tb-96.png",
+    "128": "icons/pm-tb-128.png"
+  },
   "action": {
     "default_popup": "popup/popup.html",
-    "default_title": "Sync ProtonMail Labels"
+    "default_title": "Sync ProtonMail Labels",
+    "default_label": "",
+    "default_icon": {
+      "16": "icons/pm-tb-16.png",
+      "32": "icons/pm-tb-32.png",
+      "64": "icons/pm-tb-64.png"
+    }
   },
   "permissions": [
     "accountsRead",
